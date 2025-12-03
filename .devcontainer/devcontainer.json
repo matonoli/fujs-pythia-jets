@@ -1,0 +1,22 @@
+{
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "hostRequirements": {
+        "cpus": 2
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-toolsai.jupyter",
+                "albertopdrf.root-file-viewer",
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-vscode.cpptools-themes",
+                "esbenp.prettier-vscode"
+            ]
+        }
+        
+    },
+  "postCreateCommand": "ln -sf ${containerWorkspaceFolder}/.bashrc ~/.bashrc"
+}
