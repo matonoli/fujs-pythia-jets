@@ -4,6 +4,9 @@
 #include <iostream>
 
 #include "fastjet/ClusterSequence.hh"
+#include "fastjet/AreaDefinition.hh"
+#include "fastjet/ClusterSequenceArea.hh"
+#include "fastjet/GhostedAreaSpec.hh"
 
 #include "TFile.h"
 #include "TH1D.h"
@@ -84,10 +87,12 @@ int main(int argc, char *argv[]) {
   double pt[kMaxJets];
   double eta[kMaxJets];
   double phi[kMaxJets];
+  double area[kMaxJets];
   tree->Branch("nJets", &nJets, "nJets/I");
   tree->Branch("pt", pt, "pt[nJets]/D");
   tree->Branch("eta", eta, "eta[nJets]/D");
   tree->Branch("phi", phi, "phi[nJets]/D");
+  tree->Branch("area", area, "area[nJets]/D");
 
   // Event loop
   for (int iEvent = 0; iEvent < nEvents; ++iEvent) {
@@ -116,13 +121,17 @@ int main(int argc, char *argv[]) {
     //---------------------------- 
 
     fastjet::JetDefinition jetDefinition(fastjet::antikt_algorithm, jetRadius);
-    fastjet::ClusterSequence clusterSequence(particlesContainer, jetDefinition);
+    //fastjet::JetDefinition jetDefinition(fastjet::cambridge_aachen_algorithm, jetRadius);
 
     fastjet::Selector select_eta = fastjet::SelectorAbsEtaMax(jetEtaMax);
     fastjet::Selector select_pt = fastjet::SelectorPtMin(jetPtMin);
     fastjet::Selector select_pt_eta = select_pt && select_eta;
 
-    auto inclusive_jets = clusterSequence.inclusive_jets();
+    fastjet::GhostedAreaSpec areaSpec(2.5);
+    fastjet::AreaDefinition areaDefinition(fastjet::active_area, areaSpec);
+    fastjet::ClusterSequenceArea clusterSeqArea(particlesContainer, jetDefinition, areaDefinition);
+
+    auto inclusive_jets = clusterSeqArea.inclusive_jets();
     auto sorted_jets = fastjet::sorted_by_pt(inclusive_jets); // here
     auto selected_jets = select_pt_eta(sorted_jets);
 
@@ -133,6 +142,7 @@ int main(int argc, char *argv[]) {
       eta[iJet] = selected_jets[iJet].eta();
       float phiNormalized = TVector2::Phi_mpi_pi(selected_jets[iJet].phi()); // normalize to [-pi, pi]
       phi[iJet] = phiNormalized;
+      area[iJet] = selected_jets[iJet].area();
     }
 
   // Dump all jets for this event

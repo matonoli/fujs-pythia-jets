@@ -18,10 +18,11 @@ void anaTree(TString inputFileName="jets_ptHat_30_50_jetR0.4.root") {
   TH1D hJetPt("hJetPt", ";jet p_{T} (GeV/c);Counts", 100, 0, 100); // 0 to 100 GeV/c
   TH1D hJetEta("hJetEta", ";jet #eta;Counts", 60, -3, 3); // -3 to 3 in eta
   TH1D hJetPhi("hJetPhi", ";jet #phi;Counts", 64, -TMath::Pi(), TMath::Pi()); // -pi to pi in phi
+  TH1D hJetArea("hJetArea", ";jet area;Counts", 50, 0, 1); // 0 to 1 in area
 
   // Dijet level
   TH1D hAsymmetry("hAsymmetry", ";Dijet asymmetry A_{J};Counts", 50, 0, 1); // from 0 to 1
-  TH1D hDeltaPhi("hDeltaPhi", ";#Delta#phi;Counts", 200, 0, 6.28); // 0 to 2pi
+  TH1D hDeltaPhi("hDeltaPhi", ";#Delta#phi;Counts", 200, 0, TMath::TwoPi()); // 0 to 2pi
 
   // -------------------------
   // 2) Open input file & tree
@@ -51,11 +52,13 @@ void anaTree(TString inputFileName="jets_ptHat_30_50_jetR0.4.root") {
   double pt[kMaxJets];
   double eta[kMaxJets];
   double phi[kMaxJets];
+  double area[kMaxJets];
 
   tree->SetBranchAddress("nJets", &nJets);
   tree->SetBranchAddress("pt", pt);
   tree->SetBranchAddress("eta", eta);
   tree->SetBranchAddress("phi", phi);
+  tree->SetBranchAddress("area", area);
 
 
   // -------------------------
@@ -76,6 +79,7 @@ void anaTree(TString inputFileName="jets_ptHat_30_50_jetR0.4.root") {
       hJetPt.Fill(pt[iJet]);
       hJetEta.Fill(eta[iJet]);
       hJetPhi.Fill(phi[iJet]);  
+      hJetArea.Fill(area[iJet]);
     }
 
     // -------------------------
@@ -94,7 +98,8 @@ void anaTree(TString inputFileName="jets_ptHat_30_50_jetR0.4.root") {
       double phi2 = phi[1];
 
       // calculate delta phi between the two jets and fill into histogram
-      // YOUR CODE HERE
+      double deltaPhi = std::abs(phi1 - phi2);
+      hDeltaPhi.Fill(deltaPhi);
 
     }
 
